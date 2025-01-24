@@ -33,10 +33,18 @@ public class UserController {
 //	@PostMapping("/api/employees")
 //	@ResponseBody
 //	public ResponseEntity<UnifiedResponse<Employee>> createEmployee(@RequestBody Employee employee) {
-//		UnifiedResponse<Employee> response = new UnifiedResponse<>(200, "Added Successfully",
-//				userService.createEmployee(employee));
+//		UnifiedResponse<Employee> response = new UnifiedResponse<>(200, "Added Successfully", null);
+////		userService.createEmployee(employee);
 //		return ResponseEntity.ok(response);
 //	}
+
+	@PostMapping("/api/employees")
+	@ResponseBody
+	public ResponseEntity<UnifiedResponse<Employee>> createEmployee(@RequestBody Employee employee) {
+		UnifiedResponse<Employee> response = new UnifiedResponse<>(200, "Added Successfully",
+				userService.createEmployee(employee));
+		return ResponseEntity.ok(response);
+	}
 
 	@GetMapping("/api/employees")
 	@ResponseBody

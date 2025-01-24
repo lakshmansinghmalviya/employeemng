@@ -25,6 +25,7 @@ public class UserRepository {
 		String insertSql = "INSERT INTO employees (firstName, lastName, age, email, password, doj, mobile, country, city, street, dept, role) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		System.out.println("EMploye===   " + employee);
+
 		int rowsAffected = jdbcTemplate.update(insertSql, employee.getFirstName(), employee.getLastName(),
 				employee.getAge(), employee.getEmail(), employee.getPassword(), employee.getDoj(), employee.getMobile(),
 				employee.getCountry(), employee.getCity(), employee.getStreet(), employee.getDept(),

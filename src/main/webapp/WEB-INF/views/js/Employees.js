@@ -34,7 +34,7 @@ $(document).ready(function() {
 	$(document).on("click", ".new", function() {
 		$("#employeeModal").modal("show");
 		$(".saveButton").addClass("add-employee");
-		$(".saveButton").addClass("save-employee-changes");
+		$(".saveButton").removeClass("save-employee-changes");
 		$(".saveButton").html("Add");
 	});
 
@@ -45,14 +45,17 @@ $(document).ready(function() {
 		$("#employeeModal").modal("show");
 	});
 
-	$(document).on("click", ".add-employee", function() {
+	$(document).on("click", ".add-employee", function(e) {
+		e.preventDefault();
 		const formData = getFormData();
+		console.log(formData);
 		$.ajax({
 			url: "/Project/api/employees",
 			method: "POST",
 			data: JSON.stringify(formData),
+			contentType: 'application/json',
 			success: function(response) {
-				console.log("resp" + response);
+				console.log("resp===" + response.data);
 			},
 			error: function(err) {
 				console.error("Failed to create employee:", err);
