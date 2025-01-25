@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.ls.project.enums.Role;
@@ -21,18 +22,36 @@ public class UserRepository {
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
+	@Autowired
+	private PasswordEncoder passwordEncoder;
+
 	public Employee createEmployee(Employee employee) {
 		String insertSql = "INSERT INTO employees (firstName, lastName, age, email, password, doj, mobile, country, city, street, dept, role) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		System.out.println("EMploye===   " + employee);
-
+		String hashedPwd = passwordEncoder.encode(employee.getPassword());
 		int rowsAffected = jdbcTemplate.update(insertSql, employee.getFirstName(), employee.getLastName(),
-				employee.getAge(), employee.getEmail(), employee.getPassword(), employee.getDoj(), employee.getMobile(),
+				employee.getAge(), employee.getEmail(), hashedPwd, employee.getDoj(), employee.getMobile(),
 				employee.getCountry(), employee.getCity(), employee.getStreet(), employee.getDept(),
 				employee.getRole().name());
 		if (rowsAffected <= 0) {
 			throw new RuntimeException("Employee Not Created");
 		}
+		return employee;
+	}
+
+	// Method to update employee details
+	public Employee updateEmployee(Long id, Employee employee) {
+		String sql = "UPDATE employees SET firstName = ?, lastName = ?, age = ?, email = ?, password = ?, doj = ?, mobile = ?, country = ?, city = ?, street = ?, dept = ?, role = ? WHERE id = ?";
+		String hashedPwd = passwordEncoder.encode(employee.getPassword());
+		int rowsAffected = jdbcTemplate.update(sql, employee.getFirstName(), employee.getLastName(), employee.getAge(),
+				employee.getEmail(), hashedPwd, employee.getDoj(), employee.getMobile(), employee.getCountry(),
+				employee.getCity(), employee.getStreet(), employee.getDept(), employee.getRole().name(), id);
+
+		if (rowsAffected == 0) {
+			throw new RuntimeException("Employee not found with id: " + id);
+		}
+		employee.setPassword(hashedPwd);
 		return employee;
 	}
 
@@ -44,12 +63,14 @@ public class UserRepository {
 
 	// Method to fetch employee by email and password
 	public Employee getEmployeeByEmailAndPassword(String email, String password) {
-		String sql = "SELECT * FROM employees WHERE email = ? and password =?";
-		Employee employee = jdbcTemplate.queryForObject(sql, new Object[] { email, password }, new EmployeeRowMapper());
-		if (employee == null) {
+		String sql = "SELECT * FROM employees WHERE email = ?";
+		Employee employee = jdbcTemplate.queryForObject(sql, new Object[] { email }, new EmployeeRowMapper());
+
+		if (passwordEncoder.matches(password, employee.getPassword())) {
+			return employee;
+		} else {
 			throw new RuntimeException("User not found with the provided credentials");
 		}
-		return employee;
 	}
 
 	// Method to get employee by ID
@@ -82,18 +103,4 @@ public class UserRepository {
 			return employee;
 		}
 	}
-// Method to update employee details
-//	public Employee updateEmployee(Long id, Employee employee) {
-//		String sql = "UPDATE employees SET firstName = ?, lastName = ?, age = ?, email = ?, password = ?, doj = ?, mobile = ?, country = ?, city = ?, street = ?, dept = ?, role = ? WHERE id = ?";
-//
-//		int rowsAffected = jdbcTemplate.update(sql, employee.getFirstName(), employee.getLastName(), employee.getAge(),
-//				employee.getEmail(), employee.getPassword(), employee.getDoj(), employee.getMobile(),
-//				employee.getCountry(), employee.getCity(), employee.getStreet(), employee.getDept(), employee.getRole(),
-//				id);
-//
-//		if (rowsAffected == 0) {
-//			throw new RuntimeException("Employee not found with id: " + id);
-//		}
-//		return getEmployeeById(id);
-//	}
 }

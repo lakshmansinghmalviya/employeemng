@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -30,19 +32,20 @@ public class UserController {
 		return "Employees";
 	}
 
-//	@PostMapping("/api/employees")
-//	@ResponseBody
-//	public ResponseEntity<UnifiedResponse<Employee>> createEmployee(@RequestBody Employee employee) {
-//		UnifiedResponse<Employee> response = new UnifiedResponse<>(200, "Added Successfully", null);
-////		userService.createEmployee(employee);
-//		return ResponseEntity.ok(response);
-//	}
-
 	@PostMapping("/api/employees")
 	@ResponseBody
 	public ResponseEntity<UnifiedResponse<Employee>> createEmployee(@RequestBody Employee employee) {
 		UnifiedResponse<Employee> response = new UnifiedResponse<>(200, "Added Successfully",
 				userService.createEmployee(employee));
+		return ResponseEntity.ok(response);
+	}
+
+	@PutMapping("/api/employees/{id}")
+	@ResponseBody
+	public ResponseEntity<UnifiedResponse<Employee>> updateEmployee(@PathVariable Long id,
+			@RequestBody Employee employee) {
+		UnifiedResponse<Employee> response = new UnifiedResponse<>(200, "Updated Successfully",
+				userService.updateEmployee(id, employee));
 		return ResponseEntity.ok(response);
 	}
 

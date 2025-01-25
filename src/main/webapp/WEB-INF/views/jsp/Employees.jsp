@@ -8,21 +8,10 @@
 <head>
 <meta charset="UTF-8">
 <title>Employees</title>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <jsp:include page="Libraries.jsp"></jsp:include>
 </head>
 <body>
-	<div class="container">
-		<nav class="navbar navbar-light bg-light justify-content-end">
-			<div class="d-flex align-items-center">
-				<input class="form-control me-2" type="search" placeholder="Search"
-					aria-label="Search">
-				<button class="btn btn-outline-success me-2" type="submit">Search</button>
-				<span class="ms-300"><button type="button"
-						class="btn btn-primary ms-300 new">New</button></span>
-			</div>
-		</nav>
-	</div>
+	<jsp:include page="/WEB-INF/views/jsp/TableOperation.jsp" />
 	<table class="table table-bordered color-primary">
 		<thead class="table-dark">
 			<tr>
@@ -77,7 +66,7 @@
 							<div class="col-md-4 mb-3">
 								<label for="email" class="form-label">Email</label> <input
 									type="email" class="form-control" id="email" name="email"
-									placeholder="Enter email" required>
+									placeholder="Enter email" required readonly>
 							</div>
 							<div class="col-md-4 mb-3">
 								<label for="mobile" class="form-label">Mobile</label> <input

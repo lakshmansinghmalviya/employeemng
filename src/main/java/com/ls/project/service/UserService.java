@@ -34,4 +34,8 @@ public class UserService {
 	public List<Employee> getAllEmployees() {
 		return userRepository.getAllEmployees();
 	}
+
+	public Employee updateEmployee(Long id, Employee employee) {
+		return userRepository.updateEmployee(id, employee);
+	}
 }

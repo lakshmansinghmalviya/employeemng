@@ -20,6 +20,7 @@ $(document).ready(function() {
 			success: function(res) {
 				console.log(res);
 				const role = res.data.role;
+				console.log("Role is coming...." + role);
 				if (role == 'Manager') {
 					window.location.href = '/Project/employees';
 				}

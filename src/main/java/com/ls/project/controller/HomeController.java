@@ -15,4 +15,9 @@ public class HomeController {
 	public String login() {
 		return "Login";
 	}
+
+	@RequestMapping("/test")
+	public String testBootstrap() {
+		return "Test";
+	}
 }
