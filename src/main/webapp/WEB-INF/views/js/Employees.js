@@ -3,9 +3,11 @@ $(document).ready(function() {
 
 	const pagination = {
 		pageNumber: 0,
-		pageSize: 10,
 		totalElements: 10,
-		totalPages: 1
+		pageSize: 10,
+		totalPages: 1,
+		offset: 0,
+		lastPage: false,
 	}
 
 	const setDataToPaginationObject = (response) => {
@@ -14,14 +16,6 @@ $(document).ready(function() {
 		pagination.totalElements = response.data.totalElements;
 		pagination.totalPages = response.data.totalPages;
 		console.log("Pagination objec now  === " + JSON.stringify(pagination));
-		setPaginationDataToUI();
-	}
-
-	const setPaginationDataToUI = () => {
-		console.log('Total Pages on ui ', totalPages);
-		$('#totalPages').attr('value', pagination.totalPages)
-		$("#totalPages").text("Total Page : " + pagination.totalPages);
-		$("#pageNumber").val(pagination.pageNumber + 1)
 		updatePaginationButtons();
 	}
 
@@ -32,7 +26,7 @@ $(document).ready(function() {
 			method: "GET",
 			success: function(response) {
 				setDataToPaginationObject(response)
-				employeeList = response.data.content;
+				employeeList = response.data.content.slice(0, 10);;
 				setEmployeeDataToUi(employeeList);
 			},
 			error: function(err) {
@@ -79,6 +73,7 @@ $(document).ready(function() {
 			}
 		});
 	});
+
 
 	$(document).on("click", ".save-employee-changes", function(e) {
 		e.preventDefault();
@@ -153,8 +148,18 @@ $(document).ready(function() {
 		return employeeList.find(obj => obj.id == id);
 	}
 
+	const setPaginationDataDefault = () => {
+		pagination.pageNumber = 0;
+		pagination.totalElements = 10;
+		pagination.pageSize = 10;
+		pagination.totalPages = 1;
+		pagination.offset = 0;
+		pagination.lastPage = false
+	}
+
 	$("#ageFilterSelect").change(function(e) {
 		e.preventDefault();
+		setPaginationDataDefault();
 		const filteredData = fetchAllFilteredDataFromUI();
 		const queryParams = convertToParams(filteredData);
 		fetchFilteredEmployeeFromApi(queryParams);
@@ -162,6 +167,7 @@ $(document).ready(function() {
 
 	$("#cityFilterSelect").change(function(e) {
 		e.preventDefault();
+		setPaginationDataDefault();
 		const filteredData = fetchAllFilteredDataFromUI();
 		const queryParams = convertToParams(filteredData);
 		fetchFilteredEmployeeFromApi(queryParams);
@@ -169,6 +175,7 @@ $(document).ready(function() {
 
 	$("#searchQuery").on("input", function(e) {
 		e.preventDefault();
+		setPaginationDataDefault();
 		const filteredData = fetchAllFilteredDataFromUI();
 		console.log(filteredData);
 		const queryParams = convertToParams(filteredData);
@@ -178,12 +185,10 @@ $(document).ready(function() {
 
 	$("#nextPage").click(function(e) {
 		e.preventDefault();
-		if (pagination.pageNumber < pagination.totalPages - 1) {
-			pagination.pageNumber++;
-			updatePaginationButtons();
-			const queryParams = convertToParams(fetchAllFilteredDataFromUI());
-			fetchFilteredEmployeeFromApi(queryParams);
-		}
+		pagination.pageNumber++;
+		updatePaginationButtons();
+		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		fetchFilteredEmployeeFromApi(queryParams);
 	});
 
 	$("#firstPage").click(function(e) {
@@ -205,9 +210,8 @@ $(document).ready(function() {
 
 	$("#lastPage").click(function(e) {
 		e.preventDefault();
-		pagination.pageNumber = pagination.totalPages - 1;
-		updatePaginationButtons();
-		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		$("#nextPage").hide();
+		const queryParams = convertToParams(fetchAllFilteredDataFromUIOnLastPageClicked());
 		fetchFilteredEmployeeFromApi(queryParams);
 	});
 
@@ -215,19 +219,30 @@ $(document).ready(function() {
 		e.preventDefault();
 		if (pagination.pageNumber >= 1) {
 			pagination.pageNumber--;
-			updatePaginationButtons();
-			const queryParams = convertToParams(fetchAllFilteredDataFromUI());
-			fetchFilteredEmployeeFromApi(queryParams);
 		}
+		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		fetchFilteredEmployeeFromApi(queryParams);
 	});
 
 	function updatePaginationButtons() {
 		console.log("Pagination data " + JSON.stringify(pagination));
-		$("#nextPage").toggle(pagination.pageNumber < pagination.totalPages - 1);
-		$("#lastPage").toggle(pagination.pageNumber < pagination.totalPages - 1);
+		$("#pageNumber").val(pagination.pageNumber + 1)
+		//$("#nextPage").show(pagination.totalElements >= pagination.pageSize);
+		//$("#lastPage").toggle(pagination.pageNumber < pagination.totalPages - 1);
 		$("#prevPage").toggle(pagination.pageNumber > 0);
-		$("#firstPage").toggle(pagination.pageNumber > 0);
-		$("#pageNumber").val(pagination.pageNumber + 1);
+		$("#firstPage").toggle(pagination.pageNumber > 0)
+		if (pagination.totalElements >= pagination.pageSize) {
+			$("#nextPage").show();
+		} else {
+			$("#nextPage").hide();
+		}
+		if (pagination.lastPage == true) {
+			$('#totalPages').text('Total Page:= ' + pagination.totalPages);
+			$('#totalPages').show()
+		}
+		else {
+			$('#totalPages').hide()
+		}
 	}
 
 	const fetchAllFilteredDataFromUI = () => {
@@ -237,6 +252,13 @@ $(document).ready(function() {
 			searchQuery: $("#searchQuery").val(),
 			pageNumber: pagination.pageNumber,
 			pageSize: pagination.pageSize
+		}
+	}
+
+	const fetchAllFilteredDataFromUIOnLastPageClicked = () => {
+		return {
+			...fetchAllFilteredDataFromUI(),
+			lastPage: "true"
 		}
 	}
 

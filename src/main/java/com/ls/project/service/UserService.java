@@ -42,12 +42,12 @@ public class UserService {
 	}
 
 	public PageResponse<Employee> findEmployeesByFilters(String city, String age, String searchQuery, String pageNo,
-			String pageSize, String offset, String email, String doj, String mobile, String country, String street,
+			String pageSize, String offset, String lastPage, String doj, String mobile, String country, String street,
 			String dept, String role) {
 		System.out.println("Received Parameters: in service");
 		System.out.println("City: " + city);
 		System.out.println("Age: " + age);
 		System.out.println("Query: " + searchQuery);
-		return userRepository.findEmployeesByFilters(city, age, searchQuery, pageNo, pageSize,offset);
+		return userRepository.findEmployeesByFilters(city, age, searchQuery, pageNo, pageSize, offset, lastPage);
 	}
 }

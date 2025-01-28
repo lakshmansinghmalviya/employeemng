@@ -68,6 +68,7 @@ public class UserController {
 			@RequestParam(name = "pageNumber", defaultValue = "0") String pageNo,
 			@RequestParam(name = "pageSize", defaultValue = "10") String pageSize,
 			@RequestParam(name = "offset", defaultValue = "0") String offset,
+			@RequestParam(name = "lastPage", defaultValue = "false") String lastPage,
 			@RequestParam(name = "searchQuery", required = false) String searchQuery) {
 		System.out.println("Received Parameters: in controller");
 		System.out.println("ID: " + id);
@@ -75,8 +76,8 @@ public class UserController {
 		System.out.println("Age: " + age);
 
 		UnifiedResponse<PageResponse<Employee>> response = new UnifiedResponse<>(200, "Filtered successfully",
-				userService.findEmployeesByFilters(city, age, searchQuery, pageNo, pageSize, offset, null, null, null,
-						null, null, null, null));
+				userService.findEmployeesByFilters(city, age, searchQuery, pageNo, pageSize, offset, lastPage, null,
+						null, null, null, null, null));
 		return ResponseEntity.ok(response);
 	}
 
