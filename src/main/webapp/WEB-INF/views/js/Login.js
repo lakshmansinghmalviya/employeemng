@@ -16,6 +16,7 @@ $(document).ready(function() {
 				email: email,
 				password: pwd
 			}),
+
 			contentType: 'application/json',
 			success: function(res) {
 				console.log(res);

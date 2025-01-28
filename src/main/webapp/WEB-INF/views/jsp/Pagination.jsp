@@ -14,7 +14,7 @@
 	crossorigin="anonymous">
 </head>
 <body>
-	<nav aria-label="Page navigation example">
+	<div aria-label="Page navigation example ">
 		<ul class="pagination justify-content-end">
 			<li class="page-item"><a class="page-link" id="totalPages"
 				value="99">Total Page: 99</a></li>
@@ -31,7 +31,7 @@
 			<li class="page-item"><a class="page-link btn" id="lastPage">Last</a></li>
 			<li class="page-item"><a class="page-link btn" id="nextPage">Next</a></li>
 		</ul>
-	</nav>
+	</div>
 
 	<script
 		src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

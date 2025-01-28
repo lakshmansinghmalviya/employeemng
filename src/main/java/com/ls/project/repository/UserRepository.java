@@ -89,7 +89,7 @@ public class UserRepository {
 	}
 
 	public PageResponse<Employee> findEmployeesByFilters(String city, String age, String searchQuery,
-			String comingpageNo, String comingpageSize) {
+			String comingpageNo, String comingpageSize, String offSet) {
 		StringBuilder sqlQuery = new StringBuilder("SELECT * FROM employees WHERE 1=1 ");
 		List<Object> params = new ArrayList<>();
 		int camePageNo = Integer.parseInt(comingpageNo);

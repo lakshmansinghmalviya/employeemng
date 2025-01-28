@@ -21,7 +21,8 @@ $(document).ready(function() {
 		console.log('Total Pages on ui ', totalPages);
 		$('#totalPages').attr('value', pagination.totalPages)
 		$("#totalPages").text("Total Page : " + pagination.totalPages);
-		$("#pageNumber").val(pagination.pageNumber + 1);
+		$("#pageNumber").val(pagination.pageNumber + 1)
+		updatePaginationButtons();
 	}
 
 	const fetchFilteredEmployeeFromApi = (queryParams) => {
@@ -222,8 +223,10 @@ $(document).ready(function() {
 
 	function updatePaginationButtons() {
 		console.log("Pagination data " + JSON.stringify(pagination));
-		$("#nextPage").toggleClass("disabled", pagination.pageNumber >= pagination.totalPages - 1);
-		$("#prevPage").toggleClass("disabled", pagination.pageNumber <= 0);
+		$("#nextPage").toggle(pagination.pageNumber < pagination.totalPages - 1);
+		$("#lastPage").toggle(pagination.pageNumber < pagination.totalPages - 1);
+		$("#prevPage").toggle(pagination.pageNumber > 0);
+		$("#firstPage").toggle(pagination.pageNumber > 0);
 		$("#pageNumber").val(pagination.pageNumber + 1);
 	}
 
@@ -245,7 +248,7 @@ $(document).ready(function() {
 
 	const setEmployeeDataToUi = (employees) => {
 		let rows = "";
-		console.log("Employees i am getting to render " + JSON.stringify(employees));
+		console.log("Employees i am getting to render" + JSON.stringify(employees));
 
 		employees.forEach(function(employee) {
 			rows +=
