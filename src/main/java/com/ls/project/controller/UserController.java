@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.ls.project.config.request.LoginRequest;
 import com.ls.project.model.Employee;
 import com.ls.project.response.LoginResponse;
+import com.ls.project.response.PageResponse;
 import com.ls.project.response.UnifiedResponse;
 import com.ls.project.service.UserService;
 
@@ -49,14 +51,6 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/api/employees")
-	@ResponseBody
-	public ResponseEntity<UnifiedResponse<List<Employee>>> getAllEmployee() {
-		UnifiedResponse<List<Employee>> response = new UnifiedResponse<>(200, "Logged in successfully",
-				userService.getAllEmployees());
-		return ResponseEntity.ok(response);
-	}
-
 	@PostMapping("/api/login")
 	@ResponseBody
 	public ResponseEntity<UnifiedResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
@@ -64,4 +58,25 @@ public class UserController {
 		UnifiedResponse<LoginResponse> response = new UnifiedResponse<>(200, "Logged in successfully", loginResponse);
 		return ResponseEntity.ok(response);
 	}
+
+	@GetMapping("/api/employees/filters")
+	@ResponseBody
+	public ResponseEntity<UnifiedResponse<PageResponse<Employee>>> findEmployeesByFilters(
+			@RequestParam(name = "id", required = false) String id,
+			@RequestParam(name = "city", required = false) String city,
+			@RequestParam(name = "age", required = false) String age,
+			@RequestParam(name = "pageNumber", defaultValue = "0") String pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "10") String pageSize,
+			@RequestParam(name = "searchQuery", required = false) String searchQuery) {
+		System.out.println("Received Parameters: in controller");
+		System.out.println("ID: " + id);
+		System.out.println("City: " + city);
+		System.out.println("Age: " + age);
+
+		UnifiedResponse<PageResponse<Employee>> response = new UnifiedResponse<>(200, "Filtered successfully",
+				userService.findEmployeesByFilters(city, age, searchQuery, pageNo, pageSize, null, null, null, null,
+						null, null, null, null));
+		return ResponseEntity.ok(response);
+	}
+
 }

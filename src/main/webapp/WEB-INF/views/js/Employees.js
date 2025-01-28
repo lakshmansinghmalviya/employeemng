@@ -1,40 +1,46 @@
 $(document).ready(function() {
-	// initial fetch the list of the employee
 	var employeeList = [{}]
-	const fetchEmployeeList = () => {
+
+	const pagination = {
+		pageNumber: 0,
+		pageSize: 10,
+		totalElements: 10,
+		totalPages: 1
+	}
+
+	const setDataToPaginationObject = (response) => {
+		pagination.pageNumber = response.data.pageNumber;
+		pagination.pageSize = response.data.pageSize;
+		pagination.totalElements = response.data.totalElements;
+		pagination.totalPages = response.data.totalPages;
+		console.log("Pagination objec now  === " + JSON.stringify(pagination));
+		setPaginationDataToUI();
+	}
+
+	const setPaginationDataToUI = () => {
+		console.log('Total Pages on ui ', totalPages);
+		$('#totalPages').attr('value', pagination.totalPages)
+		$("#totalPages").text("Total Page : " + pagination.totalPages);
+		$("#pageNumber").val(pagination.pageNumber + 1);
+	}
+
+	const fetchFilteredEmployeeFromApi = (queryParams) => {
+		const constructedUrl = "/Project/api/employees/filters?" + queryParams;
 		$.ajax({
-			url: "/Project/api/employees",
+			url: constructedUrl,
 			method: "GET",
-			success: function(employees) {
-				employeeList = employees.data;
-				let rows = "";
-				employees.data.forEach(function(employee) {
-					rows +=
-						"<tr class='table-success'>" +
-						"<th scope='row'>" + employee.id + "</th>" +
-						"<td>" + employee.firstName + "</td>" +
-						"<td>" + employee.lastName + "</td>" +
-						"<td>" + employee.age + "</td>" +
-						"<td>" + employee.doj + "</td>" +
-						"<td>" + employee.dept + "</td>" +
-						"<td>" + employee.email + "</td>" +
-						"<td>" + employee.mobile + "</td>" +
-						"<td>" + employee.street + ", " + employee.country + "</td>" +
-						"<td>" + employee.city + "</td>" +
-						"<td>" +
-						"<button class='btn btn-primary btn-sm editEmployee' data-id='" + employee.id + "'>Edit</button> " +
-						"<button class='btn btn-danger btn-sm ' data-id='" + employee.id + "'>Active/InActive</button>" +
-						"</td>" +
-						"</tr>";
-				});
-				$("table tbody").html(rows);
+			success: function(response) {
+				setDataToPaginationObject(response)
+				employeeList = response.data.content;
+				setEmployeeDataToUi(employeeList);
 			},
 			error: function(err) {
-				console.error("Failed to fetch employees:", err);
+				console.error("Error fetching filtered data:", err);
 			}
 		});
-	}
-	fetchEmployeeList();
+	};
+
+	fetchFilteredEmployeeFromApi("");
 
 	$(document).on("click", ".new", function() {
 		makeFormBlank();
@@ -58,14 +64,12 @@ $(document).ready(function() {
 	$(document).on("click", ".add-employee", function(e) {
 		e.preventDefault();
 		const formData = getFormData();
-		console.log(formData);
 		$.ajax({
 			url: "/Project/api/employees",
 			method: "POST",
 			data: JSON.stringify(formData),
 			contentType: 'application/json',
 			success: function(response) {
-				console.log("resp===" + response.data);
 				$("#employeeModal").modal("hide");
 				fetchEmployeeList();
 			},
@@ -143,7 +147,125 @@ $(document).ready(function() {
 		$("#role").val("");
 		$("#password").val("");
 	};
+
 	const findEmployeeById = (id) => {
 		return employeeList.find(obj => obj.id == id);
+	}
+
+	$("#ageFilterSelect").change(function(e) {
+		e.preventDefault();
+		const filteredData = fetchAllFilteredDataFromUI();
+		const queryParams = convertToParams(filteredData);
+		fetchFilteredEmployeeFromApi(queryParams);
+	});
+
+	$("#cityFilterSelect").change(function(e) {
+		e.preventDefault();
+		const filteredData = fetchAllFilteredDataFromUI();
+		const queryParams = convertToParams(filteredData);
+		fetchFilteredEmployeeFromApi(queryParams);
+	});
+
+	$("#searchQuery").on("input", function(e) {
+		e.preventDefault();
+		const filteredData = fetchAllFilteredDataFromUI();
+		console.log(filteredData);
+		const queryParams = convertToParams(filteredData);
+		console.log(queryParams);
+		fetchFilteredEmployeeFromApi(queryParams);
+	});
+
+	$("#nextPage").click(function(e) {
+		e.preventDefault();
+		if (pagination.pageNumber < pagination.totalPages - 1) {
+			pagination.pageNumber++;
+			updatePaginationButtons();
+			const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+			fetchFilteredEmployeeFromApi(queryParams);
+		}
+	});
+
+	$("#firstPage").click(function(e) {
+		e.preventDefault();
+		pagination.pageNumber = 0;
+		updatePaginationButtons();
+		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		fetchFilteredEmployeeFromApi(queryParams);
+	});
+
+	$("#goToPage").click(function(e) {
+		e.preventDefault();
+		const pageNo = $("#pageNumber").val() - 1;
+		pagination.pageNumber = pageNo;
+		const filteredData = fetchAllFilteredDataFromUI();
+		const queryParams = convertToParams(filteredData);
+		fetchFilteredEmployeeFromApi(queryParams);
+	});
+
+	$("#lastPage").click(function(e) {
+		e.preventDefault();
+		pagination.pageNumber = pagination.totalPages - 1;
+		updatePaginationButtons();
+		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		fetchFilteredEmployeeFromApi(queryParams);
+	});
+
+	$("#prevPage").click(function(e) {
+		e.preventDefault();
+		if (pagination.pageNumber >= 1) {
+			pagination.pageNumber--;
+			updatePaginationButtons();
+			const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+			fetchFilteredEmployeeFromApi(queryParams);
+		}
+	});
+
+	function updatePaginationButtons() {
+		console.log("Pagination data " + JSON.stringify(pagination));
+		$("#nextPage").toggleClass("disabled", pagination.pageNumber >= pagination.totalPages - 1);
+		$("#prevPage").toggleClass("disabled", pagination.pageNumber <= 0);
+		$("#pageNumber").val(pagination.pageNumber + 1);
+	}
+
+	const fetchAllFilteredDataFromUI = () => {
+		return {
+			age: $("#ageFilterSelect").val(),
+			city: $("#cityFilterSelect").val(),
+			searchQuery: $("#searchQuery").val(),
+			pageNumber: pagination.pageNumber,
+			pageSize: pagination.pageSize
+		}
+	}
+
+	const convertToParams = (data) => {
+		const queryParams = $.param(data);
+		console.log("Params" + queryParams)
+		return queryParams;
+	}
+
+	const setEmployeeDataToUi = (employees) => {
+		let rows = "";
+		console.log("Employees i am getting to render " + JSON.stringify(employees));
+
+		employees.forEach(function(employee) {
+			rows +=
+				"<tr class='table-success border border-success'>" +
+				"<th scope='row'>" + employee.id + "</th>" +
+				"<td>" + employee.firstName + "</td>" +
+				"<td>" + employee.lastName + "</td>" +
+				"<td>" + employee.age + "</td>" +
+				"<td>" + employee.doj + "</td>" +
+				"<td>" + employee.dept + "</td>" +
+				"<td>" + employee.email + "</td>" +
+				"<td>" + employee.mobile + "</td>" +
+				"<td>" + employee.street + ", " + employee.country + "</td>" +
+				"<td>" + employee.city + "</td>" +
+				"<td>" +
+				"<button class='btn btn-primary btn-sm editEmployee' data-id='" + employee.id + "'>Edit</button> " +
+				"<button class='btn btn-danger btn-sm ' data-id='" + employee.id + "'>Active/InActive</button>" +
+				"</td>" +
+				"</tr>";
+		});
+		$("table tbody").html(rows);
 	}
 });

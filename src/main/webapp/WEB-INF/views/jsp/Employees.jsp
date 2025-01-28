@@ -31,6 +31,7 @@
 		<tbody>
 		</tbody>
 	</table>
+	<jsp:include page="Pagination.jsp"></jsp:include>
 	<!-- Modal for editing and creating the record -->
 	<div class="modal fade" id="employeeModal" tabindex="-1"
 		aria-labelledby="employeeModalLabel" aria-hidden="true">

@@ -16,34 +16,30 @@
 	<div class="container">
 		<nav class="navbar navbar-light bg-light justify-content-end">
 			<div class="d-flex align-items-center">
-				<!-- Age Filter -->
-				<div class="dropdown me-2">
-					<button class="btn btn-outline-primary dropdown-toggle"
-						type="button" id="ageFilterDropdown" data-bs-toggle="dropdown"
-						aria-expanded="false">Filter by Age</button>
-					<div class="dropdown-menu" aria-labelledby="ageFilterDropdown">
-						<a class="dropdown-item" href="#" data-age="18-25">18-25</a> <a
-							class="dropdown-item" href="#" data-age="26-35">26-35</a> <a
-							class="dropdown-item" href="#" data-age="36-45">36-45</a> <a
-							class="dropdown-item" href="#" data-age="46+">46+</a>
-					</div>
-				</div>
-				<!-- City Filter -->
-				<div class="dropdown me-2">
-					<button class="btn btn-outline-primary dropdown-toggle"
-						type="button" id="cityFilterDropdown" data-bs-toggle="dropdown"
-						aria-expanded="false">Filter by City</button>
-					<div class="dropdown-menu" aria-labelledby="cityFilterDropdown">
-						<a class="dropdown-item" href="#" data-city="New York">New
-							York</a> <a class="dropdown-item" href="#" data-city="Los Angeles">Los
-							Angeles</a> <a class="dropdown-item" href="#" data-city="Chicago">Chicago</a>
-						<a class="dropdown-item" href="#" data-city="Houston">Houston</a>
-					</div>
+				<div class="me-2">
+					<select class="form-select" id="ageFilterSelect"
+						aria-label="Age Filter" style="min-width: 150px">
+						<option selected value="">Filter by Age</option>
+						<option value="18-25">18-25</option>
+						<option value="26-35">26-35</option>
+						<option value="36-45">36-45</option>
+						<option value="46-150">46+</option>
+					</select>
 				</div>
 
-				<!-- Search Input -->
+				<div class="me-2">
+					<select class="form-select" id="cityFilterSelect"
+						aria-label="City Filter" style="min-width: 150px">
+						<option selected value="">Filter by City</option>
+						<option value="Indore">Indore</option>
+						<option value="Bhopal">Bhopal</option>
+						<option value="Chicago">Chicago</option>
+						<option value="Houston">Houston</option>
+					</select>
+				</div>
+
 				<input class="form-control me-2" type="search" placeholder="Search"
-					aria-label="Search">
+					id="searchQuery" aria-label="Search">
 				<button class="btn btn-outline-success me-2" type="submit">Search</button>
 				<button class="btn btn-outline-primary me-2 new">New</button>
 			</div>
