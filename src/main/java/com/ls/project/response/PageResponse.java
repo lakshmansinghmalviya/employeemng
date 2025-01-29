@@ -8,6 +8,7 @@ public class PageResponse<T> {
 	private int pageSize;
 	private long totalElements;
 	private int totalPages;
+	private boolean lastPage;
 
 	public PageResponse() {
 		super();
@@ -60,5 +61,13 @@ public class PageResponse<T> {
 
 	public void setTotalPages(int totalPages) {
 		this.totalPages = totalPages;
+	}
+
+	public boolean isLastPage() {
+		return lastPage;
+	}
+
+	public void setLastPage(boolean lastPage) {
+		this.lastPage = lastPage;
 	}
 }

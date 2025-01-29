@@ -15,6 +15,7 @@ $(document).ready(function() {
 		pagination.pageSize = response.data.pageSize;
 		pagination.totalElements = response.data.totalElements;
 		pagination.totalPages = response.data.totalPages;
+		pagination.lastPage = response.data.lastPage;
 		console.log("Pagination objec now  === " + JSON.stringify(pagination));
 		updatePaginationButtons();
 	}
@@ -26,7 +27,7 @@ $(document).ready(function() {
 			method: "GET",
 			success: function(response) {
 				setDataToPaginationObject(response)
-				employeeList = response.data.content.slice(0, 10);;
+				employeeList = response.data.content
 				setEmployeeDataToUi(employeeList);
 			},
 			error: function(err) {
@@ -66,7 +67,9 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			success: function(response) {
 				$("#employeeModal").modal("hide");
-				fetchEmployeeList();
+				const filteredData = fetchAllFilteredDataFromUI();
+				const queryParams = convertToParams(filteredData);
+				fetchFilteredEmployeeFromApi(queryParams);
 			},
 			error: function(err) {
 				alert("Error occurred while creating the employee. Please try again." + err.data.msg);
@@ -86,7 +89,9 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			success: function(response) {
 				$("#employeeModal").modal("hide");
-				fetchEmployeeList();
+				const filteredData = fetchAllFilteredDataFromUI();
+				const queryParams = convertToParams(filteredData);
+				fetchFilteredEmployeeFromApi(queryParams);
 			},
 			error: function(err) {
 				alert("Error occurred while editing the employee. Please try again." + err.data.msg);
@@ -193,7 +198,7 @@ $(document).ready(function() {
 
 	$("#firstPage").click(function(e) {
 		e.preventDefault();
-		pagination.pageNumber = 0;
+		setPaginationDataDefault();
 		updatePaginationButtons();
 		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
 		fetchFilteredEmployeeFromApi(queryParams);
@@ -217,31 +222,31 @@ $(document).ready(function() {
 
 	$("#prevPage").click(function(e) {
 		e.preventDefault();
+		console.log("Before minus ===" + pagination.pageNumber);
 		if (pagination.pageNumber >= 1) {
-			pagination.pageNumber--;
+			pagination.pageNumber = pagination.pageNumber - 1;
+			pagination.lastPage = false;
 		}
+		console.log("After minus ===" + pagination.pageNumber);
 		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		console.log("The pagination params === " + queryParams);
 		fetchFilteredEmployeeFromApi(queryParams);
 	});
 
 	function updatePaginationButtons() {
 		console.log("Pagination data " + JSON.stringify(pagination));
 		$("#pageNumber").val(pagination.pageNumber + 1)
-		//$("#nextPage").show(pagination.totalElements >= pagination.pageSize);
-		//$("#lastPage").toggle(pagination.pageNumber < pagination.totalPages - 1);
 		$("#prevPage").toggle(pagination.pageNumber > 0);
 		$("#firstPage").toggle(pagination.pageNumber > 0)
-		if (pagination.totalElements >= pagination.pageSize) {
-			$("#nextPage").show();
-		} else {
-			$("#nextPage").hide();
-		}
+
 		if (pagination.lastPage == true) {
-			$('#totalPages').text('Total Page:= ' + pagination.totalPages);
-			$('#totalPages').show()
+			$("#nextPage").hide();
+			$("#nextPage").hide();
+			$("#lastPage").hide();
 		}
 		else {
-			$('#totalPages').hide()
+			$("#nextPage").show();
+			$("#lastPage").show();
 		}
 	}
 
@@ -251,7 +256,8 @@ $(document).ready(function() {
 			city: $("#cityFilterSelect").val(),
 			searchQuery: $("#searchQuery").val(),
 			pageNumber: pagination.pageNumber,
-			pageSize: pagination.pageSize
+			pageSize: pagination.pageSize,
+			lastPage: pagination.lastPage,
 		}
 	}
 

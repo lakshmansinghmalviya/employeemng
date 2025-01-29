@@ -136,7 +136,7 @@ public class UserRepository {
 			}
 
 			// Add LIMIT and OFFSET for pagination
-			int limit = pageSize;
+			int limit = pageSize + 1;
 			int offsetValue = pageNo * limit;
 			sqlQuery.append("LIMIT ? OFFSET ?");
 			params.add(limit);
@@ -148,7 +148,18 @@ public class UserRepository {
 			try {
 				List<Employee> employees = jdbcTemplate.query(sqlQuery.toString(), params.toArray(),
 						new EmployeeRowMapper());
-				return PageResponseBuilder.buildPageResponse(employees, employees.size(), 1, pageNo, pageSize);
+				
+				if (employees.isEmpty()) {
+					return findEmployeesByFiltersForLastPage(city, age, searchQuery, comingPageNo, comingPageSize,
+							offset);
+				}
+				
+				if (employees.size() == 11) {
+					return PageResponseBuilder.buildPageResponse(employees, employees.size()-1, 1, pageNo, pageSize,
+							false);
+				}
+				
+				return PageResponseBuilder.buildPageResponse(employees, employees.size(), 1, pageNo, pageSize, true);
 			} catch (Exception e) {
 				System.out.println("Error during query execution: " + e.getMessage());
 			}
@@ -238,7 +249,8 @@ public class UserRepository {
 			// Execute the query and fetch employees
 			List<Employee> employees = jdbcTemplate.query(sqlQuery.toString(), params.toArray(),
 					new EmployeeRowMapper());
-			return PageResponseBuilder.buildPageResponse(employees, employees.size(), totalPages, totalPages, pageSize);
+			return PageResponseBuilder.buildPageResponse(employees, employees.size(), totalPages, totalPages, pageSize,
+					true);
 		} catch (Exception e) {
 			System.out.println("Error during query execution: " + e.getMessage());
 		}

@@ -16,8 +16,6 @@
 <body>
 	<div aria-label="Page navigation example ">
 		<ul class="pagination justify-content-end">
-			<li class="page-item"><a class="page-link" id="totalPages"
-				value="99">Total Page: 99</a></li>
 			<li class="page-item"><a class="page-link btn" id="prevPage">Prev</a></li>
 			<li class="page-item"><a class="page-link btn" id="firstPage">First</a></li>
 			<li class="page-item">
