@@ -1,16 +1,13 @@
 package com.ls.project.repository;
 
-import java.io.Console;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cglib.proxy.InterfaceMaker;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -30,6 +27,24 @@ public class UserRepository {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	public List<Employee> createEmployees(List<Employee> employees) {
+		List<Employee> createdEmployees = new ArrayList<>();
+		for (Employee employee : employees) {
+			String insertSql = "INSERT INTO employees (id,firstName, lastName, age, email, password, doj, mobile, country, city, street, dept, role) "
+					+ "VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			System.out.println("EMploye===   " + employee);
+			int rowsAffected = jdbcTemplate.update(insertSql, employee.getId(), employee.getFirstName(),
+					employee.getLastName(), employee.getAge(), employee.getEmail(), employee.getPassword(),
+					employee.getDoj(), employee.getMobile(), employee.getCountry(), employee.getCity(),
+					employee.getStreet(), employee.getDept(), employee.getRole().name());
+			if (rowsAffected <= 0) {
+				throw new RuntimeException("Employee Not Created");
+			} else
+				createdEmployees.add(employee);
+		}
+		return createdEmployees;
+	}
 
 	public Employee createEmployee(Employee employee) {
 		String insertSql = "INSERT INTO employees (firstName, lastName, age, email, password, doj, mobile, country, city, street, dept, role) "
@@ -53,6 +68,42 @@ public class UserRepository {
 		int rowsAffected = jdbcTemplate.update(sql, employee.getFirstName(), employee.getLastName(), employee.getAge(),
 				employee.getEmail(), hashedPwd, employee.getDoj(), employee.getMobile(), employee.getCountry(),
 				employee.getCity(), employee.getStreet(), employee.getDept(), employee.getRole().name(), id);
+
+		if (rowsAffected == 0) {
+			throw new RuntimeException("Employee not found with id: " + id);
+		}
+		employee.setPassword(hashedPwd);
+		return employee;
+	}
+
+	public Employee updateEmployeeFirstName(Long id, Employee employee) {
+		String sql = "UPDATE employees SET firstName = ? WHERE id = ?";
+		String hashedPwd = passwordEncoder.encode(employee.getPassword());
+		int rowsAffected = jdbcTemplate.update(sql, employee.getFirstName(), id);
+		if (rowsAffected == 0) {
+			throw new RuntimeException("Employee not found with id: " + id);
+		}
+		employee.setPassword(hashedPwd);
+		return employee;
+	}
+
+	public Employee updateEmployeeLastName(Long id, Employee employee) {
+		String sql = "UPDATE employees SET lastName = ? WHERE id = ?";
+		String hashedPwd = passwordEncoder.encode(employee.getPassword());
+		int rowsAffected = jdbcTemplate.update(sql, employee.getLastName(), id);
+		if (rowsAffected == 0) {
+			throw new RuntimeException("Employee not found with id: " + id);
+		}
+		employee.setPassword(hashedPwd);
+		return employee;
+	}
+
+	public Employee updateEmployeeOtherDetails(Long id, Employee employee) {
+		String sql = "UPDATE employees SET  age = ?, email = ?, password = ?, doj = ?, mobile = ?, country = ?, city = ?, street = ?, dept = ?, role = ? WHERE id = ?";
+		String hashedPwd = passwordEncoder.encode(employee.getPassword());
+		int rowsAffected = jdbcTemplate.update(sql, employee.getAge(), employee.getEmail(), hashedPwd,
+				employee.getDoj(), employee.getMobile(), employee.getCountry(), employee.getCity(),
+				employee.getStreet(), employee.getDept(), employee.getRole().name(), id);
 
 		if (rowsAffected == 0) {
 			throw new RuntimeException("Employee not found with id: " + id);
@@ -148,17 +199,17 @@ public class UserRepository {
 			try {
 				List<Employee> employees = jdbcTemplate.query(sqlQuery.toString(), params.toArray(),
 						new EmployeeRowMapper());
-				
+
 				if (employees.isEmpty()) {
 					return findEmployeesByFiltersForLastPage(city, age, searchQuery, comingPageNo, comingPageSize,
 							offset);
 				}
-				
+
 				if (employees.size() == 11) {
-					return PageResponseBuilder.buildPageResponse(employees, employees.size()-1, 1, pageNo, pageSize,
+					return PageResponseBuilder.buildPageResponse(employees, employees.size() - 1, 1, pageNo, pageSize,
 							false);
 				}
-				
+
 				return PageResponseBuilder.buildPageResponse(employees, employees.size(), 1, pageNo, pageSize, true);
 			} catch (Exception e) {
 				System.out.println("Error during query execution: " + e.getMessage());
@@ -225,7 +276,6 @@ public class UserRepository {
 				params.add(searchQuery);
 			}
 		}
-
 		// Log the query before counting total records
 		System.out.println("The query before going to findTotalRecord ....." + sqlQuery);
 

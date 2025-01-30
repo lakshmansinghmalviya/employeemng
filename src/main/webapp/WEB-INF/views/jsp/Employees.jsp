@@ -36,6 +36,7 @@
 	</div>
 	<jsp:include page="Pagination.jsp"></jsp:include>
 	<jsp:include page="EmployeeModal.jsp"></jsp:include>
+	<jsp:include page="UploadFileModal.jsp"></jsp:include>
 	<script type="text/javascript"><%@include file="/WEB-INF/views/js/Employees.js" %></script>
 </body>
 </html>

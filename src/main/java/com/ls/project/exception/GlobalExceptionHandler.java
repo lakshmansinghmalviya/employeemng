@@ -11,13 +11,16 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ls.project.response.Message;
 import com.ls.project.response.UnifiedResponse;
 
+import lombok.experimental.StandardException;
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
 	@ExceptionHandler(RuntimeException.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
 	public ResponseEntity<UnifiedResponse<Message>> handleRuntimeException(RuntimeException ex) {
 		UnifiedResponse<Message> response = new UnifiedResponse<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),
-				"Something went wrong" + ex.getMessage(), new Message(ex.getMessage()));
+				"Something went wrong " + ex.getMessage(), new Message(ex.getMessage()));
 		return ResponseEntity.ok(response);
 	}
 

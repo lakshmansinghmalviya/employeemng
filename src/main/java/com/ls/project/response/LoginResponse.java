@@ -1,6 +1,6 @@
 package com.ls.project.response;
 
-import com.ls.project.enums.*;
+import com.ls.project.enums.Role;
 
 public class LoginResponse {
 	private Role role;
@@ -12,7 +12,7 @@ public class LoginResponse {
 	public Role getRole() {
 		return role;
 	}
- 
+
 	public LoginResponse(Role role) {
 		super();
 		this.role = role;

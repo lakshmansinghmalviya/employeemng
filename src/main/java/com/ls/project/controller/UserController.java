@@ -1,5 +1,12 @@
 package com.ls.project.controller;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,8 +19,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.ls.project.config.request.LoginRequest;
+import com.ls.project.enums.Role;
 import com.ls.project.model.Employee;
 import com.ls.project.response.LoginResponse;
 import com.ls.project.response.PageResponse;
@@ -37,6 +46,15 @@ public class UserController {
 	public ResponseEntity<UnifiedResponse<Employee>> createEmployee(@RequestBody Employee employee) {
 		UnifiedResponse<Employee> response = new UnifiedResponse<>(200, "Added Successfully",
 				userService.createEmployee(employee));
+		return ResponseEntity.ok(response);
+	}
+
+	@PostMapping(value = "/api/employees/csv", consumes = { "multipart/form-data" })
+	@ResponseBody
+	public ResponseEntity<UnifiedResponse<List<Employee>>> createEmployeeUsingCsvFile(
+			@RequestParam("file") MultipartFile file) throws IOException {
+		UnifiedResponse<List<Employee>> response = new UnifiedResponse<>(200, "Added Successfully",
+				userService.createEmployees(file));
 		return ResponseEntity.ok(response);
 	}
 
@@ -78,5 +96,4 @@ public class UserController {
 						null, null, null, null, null));
 		return ResponseEntity.ok(response);
 	}
-
 }

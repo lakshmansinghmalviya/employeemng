@@ -7,6 +7,7 @@
 <title>Employee Create and Update Modal</title>
 </head>
 <body>
+
 	<!-- Modal for editing and creating the record -->
 	<div class="modal fade" id="employeeModal" tabindex="-1"
 		aria-labelledby="employeeModalLabel" aria-hidden="true">

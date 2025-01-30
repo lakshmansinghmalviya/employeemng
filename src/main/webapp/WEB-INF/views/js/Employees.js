@@ -1,4 +1,5 @@
 $(document).ready(function() {
+
 	var employeeList = [{}]
 
 	const pagination = {
@@ -299,4 +300,9 @@ $(document).ready(function() {
 		});
 		$("table tbody").html(rows);
 	}
+
+	$(".newByCSV").click(function(e) {
+		e.preventDefault();
+		$("#fileUploadModal").modal("show");
+	});
 });
