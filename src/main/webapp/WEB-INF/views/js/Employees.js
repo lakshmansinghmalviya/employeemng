@@ -17,7 +17,7 @@ $(document).ready(function() {
 		pagination.totalElements = response.data.totalElements;
 		pagination.totalPages = response.data.totalPages;
 		pagination.lastPage = response.data.lastPage;
-		console.log("Pagination objec now  === " + JSON.stringify(pagination));
+		console.log("Pagination object now  === " + JSON.stringify(pagination));
 		updatePaginationButtons();
 	}
 
@@ -51,6 +51,7 @@ $(document).ready(function() {
 	$(document).on("click", ".editEmployee", function() {
 		const employeeId = $(this).data("id")
 		$("#email").attr("readonly", true);
+		makeFormBlank();
 		setDataToForm(findEmployeeById(employeeId));
 		$(".saveButton").html("Save Changes");
 		$(".saveButton").addClass("save-employee-changes");
@@ -61,6 +62,8 @@ $(document).ready(function() {
 	$(document).on("click", ".add-employee", function(e) {
 		e.preventDefault();
 		const formData = getFormData();
+		console.log("Form data==" + JSON.stringify(formData));
+
 		$.ajax({
 			url: "/Project/api/employees",
 			method: "POST",
@@ -101,6 +104,13 @@ $(document).ready(function() {
 	});
 
 	const getFormData = () => {
+		let selectedServices = [];
+		$(".dropdown-menu input:checked").each(function() {
+			selectedServices.push($(this).val());
+		});
+		let status = $("input[name='status']:checked").val();
+		console.log("Selected Status:", status);
+
 		const formData = {
 			id: $("#employeeId").val(),
 			firstName: $("#firstName").val(),
@@ -113,11 +123,14 @@ $(document).ready(function() {
 			street: $("#street").val(),
 			dept: $("#dept").val(),
 			doj: $("#doj").val(),
-			role: $("#role").val(),
-			password: $("#password").val()
+			roles: $("#role").val(),
+			password: $("#password").val(),
+			services: selectedServices.join(','),
+			active: status == 'active' ? true : false,
 		};
 		return formData;
 	};
+
 	const setDataToForm = (employee) => {
 		$("#employeeId").val(employee.id);
 		$("#firstName").val(employee.firstName);
@@ -130,9 +143,22 @@ $(document).ready(function() {
 		$("#street").val(employee.street);
 		$("#dept").val(employee.dept);
 		$("#doj").val(employee.doj);
-		$("#role").val(employee.role);
-		$("#password").val(employee.password);
+		$("#role").val(employee.roles);
+		$("#password").val("");
+		if (employee.active) {
+			$("#active").prop("checked", true);
+		} else {
+			$("#inactive").prop("checked", true);
+		}
+
+		let services = employee.services.split(',');
+		$("#serviceDropdown").siblings("ul").find("input").each(function() {
+			if (services.includes($(this).val())) {
+				$(this).prop("checked", true);
+			}
+		});
 	};
+
 
 	const makeFormBlank = () => {
 		$("#employeeId").val("");
@@ -148,6 +174,9 @@ $(document).ready(function() {
 		$("#doj").val("");
 		$("#role").val("");
 		$("#password").val("");
+		$(".dropdown-menu input:checked").prop("checked", false);
+		$("input[name='status']").prop("checked", false);
+		$("#active").prop("checked", true);
 	};
 
 	const findEmployeeById = (id) => {
@@ -281,7 +310,7 @@ $(document).ready(function() {
 
 		employees.forEach(function(employee) {
 			rows +=
-				"<tr class='table-success border border-success'>" +
+				"<tr class='table-success border border-success editEmployee' data-id='" + employee.id + "'>" +
 				"<th scope='row'>" + employee.id + "</th>" +
 				"<td>" + employee.firstName + "</td>" +
 				"<td>" + employee.lastName + "</td>" +
@@ -294,7 +323,9 @@ $(document).ready(function() {
 				"<td>" + employee.city + "</td>" +
 				"<td>" +
 				"<button class='btn btn-primary btn-sm editEmployee' data-id='" + employee.id + "'>Edit</button> " +
-				"<button class='btn btn-danger btn-sm ' data-id='" + employee.id + "'>Active/InActive</button>" +
+				"</td>" +
+				"<td>" +
+				"<button class='btn btn-danger btn-sm ' data-id='" + employee.id + "'>" + (employee.active ? "YES" : "NO") + "</button>" +
 				"</td>" +
 				"</tr>";
 		});

@@ -1,6 +1,5 @@
 package com.ls.project.config;
 
-import javax.servlet.MultipartConfigElement;
 import javax.sql.DataSource;
 
 import org.springframework.context.annotation.Bean;
@@ -49,5 +48,4 @@ public class AppConfig {
 	public TransactionTemplate transactionTemplate() {
 		return new TransactionTemplate(transactionManager());
 	}
- 
 }

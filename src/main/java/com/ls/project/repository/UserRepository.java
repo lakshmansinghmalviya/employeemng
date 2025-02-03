@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.ls.project.config.util.PageResponseBuilder;
-import com.ls.project.enums.Role;
 import com.ls.project.model.Employee;
 import com.ls.project.response.PageResponse;
 
@@ -31,13 +30,14 @@ public class UserRepository {
 	public List<Employee> createEmployees(List<Employee> employees) {
 		List<Employee> createdEmployees = new ArrayList<>();
 		for (Employee employee : employees) {
-			String insertSql = "INSERT INTO employees (id,firstName, lastName, age, email, password, doj, mobile, country, city, street, dept, role) "
-					+ "VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+			String insertSql = "INSERT INTO employees (id,firstName, lastName, age, email, password, doj, mobile, country, city, street, dept, roles, services, active) "
+					+ "VALUES (?,?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 			System.out.println("EMploye===   " + employee);
 			int rowsAffected = jdbcTemplate.update(insertSql, employee.getId(), employee.getFirstName(),
 					employee.getLastName(), employee.getAge(), employee.getEmail(), employee.getPassword(),
 					employee.getDoj(), employee.getMobile(), employee.getCountry(), employee.getCity(),
-					employee.getStreet(), employee.getDept(), employee.getRole().name());
+					employee.getStreet(), employee.getDept(), employee.getRoles(), employee.getServices(),
+					employee.getActive());
 			if (rowsAffected <= 0) {
 				throw new RuntimeException("Employee Not Created");
 			} else
@@ -47,14 +47,17 @@ public class UserRepository {
 	}
 
 	public Employee createEmployee(Employee employee) {
-		String insertSql = "INSERT INTO employees (firstName, lastName, age, email, password, doj, mobile, country, city, street, dept, role) "
-				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+		// At repository layer =
+		System.out.println("The value of the employee is at repo === " + employee);
+
+		String insertSql = "INSERT INTO employees (firstName, lastName, age, email, password, doj, mobile, country, city, street, dept, roles, services, active) "
+				+ "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		System.out.println("EMploye===   " + employee);
 		String hashedPwd = passwordEncoder.encode(employee.getPassword());
 		int rowsAffected = jdbcTemplate.update(insertSql, employee.getFirstName(), employee.getLastName(),
 				employee.getAge(), employee.getEmail(), hashedPwd, employee.getDoj(), employee.getMobile(),
 				employee.getCountry(), employee.getCity(), employee.getStreet(), employee.getDept(),
-				employee.getRole().name());
+				employee.getRoles(), employee.getServices(), employee.getActive());
 		if (rowsAffected <= 0) {
 			throw new RuntimeException("Employee Not Created");
 		}
@@ -62,12 +65,13 @@ public class UserRepository {
 	}
 
 	// Method to update employee details
-	public Employee updateEmployee(Long id, Employee employee) {
-		String sql = "UPDATE employees SET firstName = ?, lastName = ?, age = ?, email = ?, password = ?, doj = ?, mobile = ?, country = ?, city = ?, street = ?, dept = ?, role = ? WHERE id = ?";
+	public Employee updateEmployeeInOneGo(Long id, Employee employee) {
+		String sql = "UPDATE employees SET firstName = ?, lastName = ?, age = ?, email = ?, password = ?, doj = ?, mobile = ?, country = ?, city = ?, street = ?, dept = ?, roles = ?, services = ?, active=?  WHERE id = ?";
 		String hashedPwd = passwordEncoder.encode(employee.getPassword());
 		int rowsAffected = jdbcTemplate.update(sql, employee.getFirstName(), employee.getLastName(), employee.getAge(),
 				employee.getEmail(), hashedPwd, employee.getDoj(), employee.getMobile(), employee.getCountry(),
-				employee.getCity(), employee.getStreet(), employee.getDept(), employee.getRole().name(), id);
+				employee.getCity(), employee.getStreet(), employee.getDept(), employee.getRoles(),
+				employee.getServices(), employee.getActive(), id);
 
 		if (rowsAffected == 0) {
 			throw new RuntimeException("Employee not found with id: " + id);
@@ -99,11 +103,11 @@ public class UserRepository {
 	}
 
 	public Employee updateEmployeeOtherDetails(Long id, Employee employee) {
-		String sql = "UPDATE employees SET  age = ?, email = ?, password = ?, doj = ?, mobile = ?, country = ?, city = ?, street = ?, dept = ?, role = ? WHERE id = ?";
+		String sql = "UPDATE employees SET  age = ?, email = ?, password = ?, doj = ?, mobile = ?, country = ?, city = ?, street = ?, dept = ?, roles = ?, services= ? WHERE id = ?";
 		String hashedPwd = passwordEncoder.encode(employee.getPassword());
 		int rowsAffected = jdbcTemplate.update(sql, employee.getAge(), employee.getEmail(), hashedPwd,
 				employee.getDoj(), employee.getMobile(), employee.getCountry(), employee.getCity(),
-				employee.getStreet(), employee.getDept(), employee.getRole().name(), id);
+				employee.getStreet(), employee.getDept(), employee.getRoles(), employee.getServices(), id);
 
 		if (rowsAffected == 0) {
 			throw new RuntimeException("Employee not found with id: " + id);
@@ -121,8 +125,11 @@ public class UserRepository {
 	// Method to fetch employee by email and password
 	public Employee getEmployeeByEmailAndPassword(String email, String password) {
 		String sql = "SELECT * FROM employees WHERE email = ?";
+		System.out.println(
+				"Employee is coming.... inside the repo before fetching from the db " + email + "   " + password);
 		Employee employee = jdbcTemplate.queryForObject(sql, new Object[] { email }, new EmployeeRowMapper());
-
+		System.out.println(
+				"Employee is coming.... inside the repo after fetching from the db " + email + "   " + password);
 		if (passwordEncoder.matches(password, employee.getPassword())) {
 			return employee;
 		} else {
@@ -180,8 +187,9 @@ public class UserRepository {
 						.append("(mobile LIKE CONCAT('%', ?, '%')) OR ")
 						.append("(country LIKE CONCAT('%', ?, '%')) OR ")
 						.append("(street LIKE CONCAT('%', ?, '%')) OR ").append("(city LIKE CONCAT('%', ?, '%')) OR ")
-						.append("(dept LIKE CONCAT('%', ?, '%')) OR ").append("(role LIKE CONCAT('%', ?, '%')))");
-				for (int i = 0; i < 10; i++) {
+						.append("(dept LIKE CONCAT('%', ?, '%')) OR ").append("(roles LIKE CONCAT('%', ?, '%')) OR ")
+						.append("(services LIKE CONCAT('%', ?, '%')))");
+				for (int i = 0; i < 11; i++) {
 					params.add(searchQuery);
 				}
 			}
@@ -271,8 +279,8 @@ public class UserRepository {
 					.append("(doj LIKE CONCAT('%', ?, '%')) OR ").append("(mobile LIKE CONCAT('%', ?, '%')) OR ")
 					.append("(country LIKE CONCAT('%', ?, '%')) OR ").append("(street LIKE CONCAT('%', ?, '%')) OR ")
 					.append("(city LIKE CONCAT('%', ?, '%')) OR ").append("(dept LIKE CONCAT('%', ?, '%')) OR ")
-					.append("(role LIKE CONCAT('%', ?, '%')))");
-			for (int i = 0; i < 10; i++) {
+					.append("(roles LIKE CONCAT('%', ?, '%')) OR ").append("(services LIKE CONCAT('%', ?, '%')))");
+			for (int i = 0; i < 11; i++) {
 				params.add(searchQuery);
 			}
 		}
@@ -323,7 +331,9 @@ public class UserRepository {
 			employee.setCity(rs.getString("city"));
 			employee.setStreet(rs.getString("street"));
 			employee.setDept(rs.getString("dept"));
-			employee.setRole(Role.valueOf(rs.getString("role")));
+			employee.setRoles(rs.getString("roles"));
+			employee.setServices(rs.getString("services"));
+			employee.setActive(rs.getBoolean("active"));
 			return employee;
 		}
 	}

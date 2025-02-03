@@ -89,14 +89,68 @@
 									<option value="" disabled selected>Select role</option>
 									<option value="Manager">Manager</option>
 									<option value="Developer">Developer</option>
+									<option value="Support">Support</option>
+									<option value="Admin">Admin</option>
+									<option value="Software Engineer">Software Engineer</option>
+									<option value="Network Engineer">Network Engineer</option>
 								</select>
 							</div>
 						</div>
+						<div class="row">
+							<div class="col-md-6 mb-3">
+								<label for="serviceDropdown" class="form-label">Services</label>
+								<div class="dropdown-container">
+									<div class="dropdown-toggle btn border border-1 w-100"
+										id="serviceDropdown" data-bs-toggle="dropdown"
+										aria-expanded="false">Select Services</div>
+									<ul class="dropdown-menu w-100"
+										aria-labelledby="serviceDropdown">
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="A"> A</label></li>
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="B"> B</label></li>
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="C"> C</label></li>
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="D"> D</label></li>
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="E"> E</label></li>
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="F"> F</label></li>
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="G"> G</label></li>
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="H"> H</label></li>
+										<li><label class="dropdown-item"><input
+												type="checkbox" value="I"> I</label></li>
+									</ul>
+								</div>
+							</div>
 
-						<div class="mb-3">
-							<label for="password" class="form-label">Password</label> <input
-								type="password" class="form-control" id="password"
-								name="password" placeholder="Enter password" required>
+							<div class="col-md-6 mb-3">
+								<label for="password" class="form-label">Password</label><input
+									type="password" class="form-control" id="password"
+									name="password" placeholder="Enter password" required>
+							</div>
+						</div>
+						<div class='row activeInActiveRow'>
+							<div class="col-md-6 mb-3">
+								<div class="d-flex justify-content-around align-items-center">
+
+									<div class="form-check">
+										<input class="form-check-input" type="radio" name="status"
+											id="active" value="active" checked> <label
+											class="form-check-label active" for="active"> Active </label>
+									</div>
+
+									<div class="form-check">
+										<input class="form-check-input" type="radio" name="status"
+											id="inactive" value="inactive"> <label
+											class="form-check-label" for="inactive"> Inactive </label>
+									</div>
+
+								</div>
+							</div>
 						</div>
 					</form>
 				</div>

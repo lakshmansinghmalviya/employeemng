@@ -16,12 +16,9 @@ import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ls.project.config.request.LoginRequest;
-import com.ls.project.enums.Role;
 import com.ls.project.model.Employee;
 import com.ls.project.repository.UserRepository;
-import com.ls.project.response.LoginResponse;
 import com.ls.project.response.PageResponse;
-import com.ls.project.response.UnifiedResponse;
 
 @Service
 public class UserService {
@@ -29,20 +26,18 @@ public class UserService {
 	private UserRepository userRepository;
 
 	private final TransactionTemplate transactionTemplate;
- 
+
 	public UserService(PlatformTransactionManager transactionManager) {
 		this.transactionTemplate = new TransactionTemplate(transactionManager);
 	}
 
-	public LoginResponse getEmployeeByEmailAndPassword(LoginRequest loginRequest) {
+	public Employee getEmployeeByEmailAndPassword(LoginRequest loginRequest) {
 		Employee employee = userRepository.getEmployeeByEmailAndPassword(loginRequest.getEmail(),
 				loginRequest.getPassword());
 		if (employee == null) {
 			throw new RuntimeException("User not found with the details");
 		}
-		LoginResponse response = new LoginResponse();
-		response.setRole(employee.getRole());
-		return response;
+		return employee;
 	}
 
 	public Employee createEmployee(Employee employee) {
@@ -83,7 +78,7 @@ public class UserService {
 					employee.setCity(values[9].trim().replaceAll("\"", ""));
 					employee.setStreet(values[10].trim().replaceAll("\"", ""));
 					employee.setDept(values[11].trim().replaceAll("\"", ""));
-					employee.setRole(Role.valueOf(values[12].trim().replaceAll("\"", "")));
+					employee.setRoles(values[12].trim().replaceAll("\"", ""));
 
 					employees.add(employee);
 				} catch (NumberFormatException e) {
@@ -103,7 +98,6 @@ public class UserService {
 		return userRepository.getAllEmployees();
 	}
 
- 
 	public Employee updateEmployee(Long id, Employee employee) {
 		return transactionTemplate.execute(new TransactionCallback<Employee>() {
 			@Override
@@ -119,6 +113,10 @@ public class UserService {
 				}
 			}
 		});
+	}
+
+	public Employee updateEmployeeInOneGo(Long id, Employee employee) {
+		return userRepository.updateEmployeeInOneGo(id, employee);
 	}
 
 	public Employee updateEmployeeFirstName(Long id, Employee employee) {

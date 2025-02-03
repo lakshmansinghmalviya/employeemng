@@ -11,8 +11,6 @@ import org.springframework.web.servlet.ModelAndView;
 import com.ls.project.response.Message;
 import com.ls.project.response.UnifiedResponse;
 
-import lombok.experimental.StandardException;
-
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

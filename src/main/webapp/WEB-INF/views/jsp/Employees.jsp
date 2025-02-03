@@ -28,6 +28,7 @@
 					<th scope="col">Address</th>
 					<th scope="col">City</th>
 					<th scope="col">Actions</th>
+					<th scope="col">Active</th>
 				</tr>
 			</thead>
 			<tbody>

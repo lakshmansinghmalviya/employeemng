@@ -1,6 +1,5 @@
 $(document).ready(function() {
 	console.log("Hello login page");
-
 	$(document).on("click", ".login", function(e) {
 		e.preventDefault();
 
@@ -19,13 +18,19 @@ $(document).ready(function() {
 
 			contentType: 'application/json',
 			success: function(res) {
-				console.log(res);
-				const role = res.data.role;
+				console.log("Data is coming like this == " + JSON.stringify(res));
+				const role = res.data.roles;
 				console.log("Role is coming...." + role);
-				if (role == 'Manager') {
+				if (role == 'Manager' || role == 'Admin') {
+					console.log("Came inside the role mang na dadmin ===" + role);
 					window.location.href = '/Project/employees';
 				}
-				else if (role == 'Developer') {
+				else if (role != null) {
+					console.log("Role is coming.... inside the elif" + role);
+					window.location.href = '/Project/user/dashboard';
+				}
+				else {
+					console.log("Role is coming.... inside the elif" + role);
 					window.location.href = '/Project/login';
 				}
 			},
