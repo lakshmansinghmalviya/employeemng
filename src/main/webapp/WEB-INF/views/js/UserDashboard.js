@@ -17,8 +17,7 @@ $(document).ready(function() {
 		});
 	})
 
-	$(".services").click(function() {
-		///user/remove/session
+	$(".services").click(function() { 
 		const constructedUrl = "/Project/user/data";
 		$.ajax({
 			url: constructedUrl,

@@ -1,7 +1,5 @@
 package com.ls.project.repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,11 +7,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
 import com.ls.project.config.util.PageResponseBuilder;
+import com.ls.project.mapper.EmployeeRowMapper;
 import com.ls.project.model.Employee;
 import com.ls.project.response.PageResponse;
 
@@ -130,6 +128,7 @@ public class UserRepository {
 		Employee employee = jdbcTemplate.queryForObject(sql, new Object[] { email }, new EmployeeRowMapper());
 		System.out.println(
 				"Employee is coming.... inside the repo after fetching from the db " + email + "   " + password);
+
 		if (passwordEncoder.matches(password, employee.getPassword())) {
 			return employee;
 		} else {
@@ -140,11 +139,11 @@ public class UserRepository {
 	// Method to get employee by ID
 	public Employee getEmployeeById(Long id) {
 		String sql = "SELECT * FROM employees WHERE id = ?";
-		List<Employee> employees = jdbcTemplate.query(sql, new Object[] { id }, new EmployeeRowMapper());
-		if (employees.isEmpty()) {
+		Employee employee = jdbcTemplate.queryForObject(sql, new Object[] { id }, new EmployeeRowMapper());
+		if (employee == null) {
 			throw new RuntimeException("Employee not found with id: " + id);
 		}
-		return employees.get(0);
+		return employee;
 	}
 
 	public PageResponse<Employee> findEmployeesByFilters(String city, String age, String searchQuery,
@@ -313,28 +312,5 @@ public class UserRepository {
 			System.out.println("Error during query execution: " + e.getMessage());
 		}
 		return null;
-	}
-
-	public class EmployeeRowMapper implements RowMapper<Employee> {
-		@Override
-		public Employee mapRow(ResultSet rs, int rowNum) throws SQLException {
-			Employee employee = new Employee();
-			employee.setId(rs.getLong("id"));
-			employee.setFirstName(rs.getString("firstName"));
-			employee.setLastName(rs.getString("lastName"));
-			employee.setAge(rs.getInt("age"));
-			employee.setEmail(rs.getString("email"));
-			employee.setPassword(rs.getString("password"));
-			employee.setDoj(rs.getString("doj"));
-			employee.setMobile(rs.getString("mobile"));
-			employee.setCountry(rs.getString("country"));
-			employee.setCity(rs.getString("city"));
-			employee.setStreet(rs.getString("street"));
-			employee.setDept(rs.getString("dept"));
-			employee.setRoles(rs.getString("roles"));
-			employee.setServices(rs.getString("services"));
-			employee.setActive(rs.getBoolean("active"));
-			return employee;
-		}
 	}
 }

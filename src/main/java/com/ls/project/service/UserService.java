@@ -44,6 +44,10 @@ public class UserService {
 		return userRepository.createEmployee(employee);
 	}
 
+	public Employee getEmployeeById(Long id) {
+		return userRepository.getEmployeeById(id);
+	}
+
 	public List<Employee> createEmployees(MultipartFile file) throws IOException {
 		List<Employee> employees = new ArrayList<>();
 		try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {

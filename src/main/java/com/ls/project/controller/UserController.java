@@ -38,12 +38,12 @@ public class UserController {
 	public String employeesPage() {
 		return "Employees";
 	}
- 
+
 	@GetMapping("/user/remove/session")
 	public String removeUserSession(HttpSession session) {
 		System.out.println("Removing session...");
 		session.invalidate();
-		return "redirect:/login"; 
+		return "redirect:/login";
 	}
 
 	@GetMapping("/user/dashboard")
@@ -93,7 +93,6 @@ public class UserController {
 			HttpSession session) {
 		System.out.println("Login data be like ===" + loginRequest);
 		Employee employee = userService.getEmployeeByEmailAndPassword(loginRequest);
-		employee.setFirstName("🤩 " + employee.getFirstName());
 		session.setAttribute("loggedInUser", employee);
 		LoginResponse loginResponse = new LoginResponse(employee.getRoles());
 		UnifiedResponse<LoginResponse> response = new UnifiedResponse<>(200, "Logged in successfully", loginResponse);
