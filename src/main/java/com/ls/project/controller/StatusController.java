@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 @Controller
 public class StatusController {
-
 	Logger log = LoggerFactory.getLogger(StatusController.class);
 
 	@Autowired
