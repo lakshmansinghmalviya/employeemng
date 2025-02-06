@@ -1,12 +1,10 @@
 package com.ls.project.model;
 
-import com.ls.project.enums.Role;
-
 public class Employee {
 	private Long id;
 	private String firstName;
 	private String lastName;
-	private int age;
+	private Integer age;
 	private String email;
 	private String password;
 	private String doj;
@@ -15,7 +13,70 @@ public class Employee {
 	private String city;
 	private String street;
 	private String dept;
-	private Role role;
+	private String roles;
+	private String services;
+	private Boolean active;
+
+	public Employee() {
+		super();
+	}
+
+	@Override
+	public String toString() {
+		return "Employee [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", age=" + age
+				+ ", email=" + email + ", password=" + password + ", doj=" + doj + ", mobile=" + mobile + ", country="
+				+ country + ", city=" + city + ", street=" + street + ", dept=" + dept + ", roles=" + roles
+				+ ", services=" + services + ", active=" + active + "]";
+	}
+
+	public Employee(Long id, String firstName, String lastName, Integer age, String email, String password, String doj,
+			String mobile, String country, String city, String street, String dept, String roles, String services,
+			Boolean active) {
+		super();
+		this.id = id;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.age = age;
+		this.email = email;
+		this.password = password;
+		this.doj = doj;
+		this.mobile = mobile;
+		this.country = country;
+		this.city = city;
+		this.street = street;
+		this.dept = dept;
+		this.roles = roles;
+		this.services = services;
+		this.active = active;
+	}
+
+	public String getRoles() {
+		return roles;
+	}
+
+	public void setRoles(String roles) {
+		this.roles = roles;
+	}
+
+	public String getServices() {
+		return services;
+	}
+
+	public void setServices(String services) {
+		this.services = services;
+	}
+
+	public Boolean getActive() {
+		return active;
+	}
+
+	public void setActive(Boolean active) {
+		this.active = active;
+	}
+
+	public void setAge(Integer age) {
+		this.age = age;
+	}
 
 	public Long getId() {
 		return id;
@@ -35,13 +96,6 @@ public class Employee {
 
 	public String getLastName() {
 		return lastName;
-	}
-
-	@Override
-	public String toString() {
-		return "Employee [id=" + id + ", firstName=" + firstName + ", lastName=" + lastName + ", age=" + age
-				+ ", email=" + email + ", password=" + password + ", doj=" + doj + ", mobile=" + mobile + ", country="
-				+ country + ", city=" + city + ", street=" + street + ", dept=" + dept + ", role=" + role;
 	}
 
 	public void setLastName(String lastName) {
@@ -110,14 +164,6 @@ public class Employee {
 
 	public void setDept(String dept) {
 		this.dept = dept;
-	}
-
-	public Role getRole() {
-		return role;
-	}
-
-	public void setRole(Role role) {
-		this.role = role;
 	}
 
 	public String getDoj() {

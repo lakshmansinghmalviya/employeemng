@@ -42,6 +42,7 @@
 					id="searchQuery" aria-label="Search">
 				<button class="btn btn-outline-success me-2" type="submit">Search</button>
 				<button class="btn btn-outline-primary me-2 new">New</button>
+				<button class="btn btn-outline-primary me-2 newByCSV">AddByCSV</button>
 			</div>
 		</nav>
 	</div>

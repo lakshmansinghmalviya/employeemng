@@ -1,8 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
-<%@ page import="java.util.List"%>
-<%@ page import="com.ls.project.model.Employee"%>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 
 <!DOCTYPE html>
 <html>
@@ -28,6 +25,7 @@
 					<th scope="col">Address</th>
 					<th scope="col">City</th>
 					<th scope="col">Actions</th>
+					<th scope="col">Active</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -36,6 +34,7 @@
 	</div>
 	<jsp:include page="Pagination.jsp"></jsp:include>
 	<jsp:include page="EmployeeModal.jsp"></jsp:include>
+	<jsp:include page="UploadFileModal.jsp"></jsp:include>
 	<script type="text/javascript"><%@include file="/WEB-INF/views/js/Employees.js" %></script>
 </body>
 </html>

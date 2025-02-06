@@ -1,24 +1,27 @@
 package com.ls.project.response;
 
-import com.ls.project.enums.*;
-
 public class LoginResponse {
-	private Role role;
+	private String roles;
 
 	public LoginResponse() {
 		super();
 	}
 
-	public Role getRole() {
-		return role;
-	}
- 
-	public LoginResponse(Role role) {
+	public LoginResponse(String roles) {
 		super();
-		this.role = role;
+		this.roles = roles;
 	}
 
-	public void setRole(Role role) {
-		this.role = role;
+	public String getRoles() {
+		return roles;
+	}
+
+	public void setRoles(String roles) {
+		this.roles = roles;
+	}
+
+	@Override
+	public String toString() {
+		return "LoginResponse [roles=" + roles + "]";
 	}
 }

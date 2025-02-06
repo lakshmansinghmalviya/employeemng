@@ -1,6 +1,9 @@
 package com.ls.project.controller;
 
+import java.io.IOException;
 import java.util.List;
+
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,6 +17,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.ModelAndView;
 
 import com.ls.project.config.request.LoginRequest;
 import com.ls.project.model.Employee;
@@ -34,6 +39,27 @@ public class UserController {
 		return "Employees";
 	}
 
+	@GetMapping("/user/remove/session")
+	public String removeUserSession(HttpSession session) {
+		System.out.println("Removing session...");
+		session.invalidate();
+		return "redirect:/login";
+	}
+
+	@GetMapping("/user/dashboard")
+	public ModelAndView userDashboardPage(HttpSession session) {
+		ModelAndView modelAndView = new ModelAndView("UserDashboard");
+		Employee employee = (Employee) session.getAttribute("loggedInUser");
+		if (employee == null) {
+			modelAndView.setViewName("redirect:/login");
+			return modelAndView;
+		}
+		String[] services = employee.getServices().split(",");
+		modelAndView.addObject("employee", employee);
+		modelAndView.addObject("services", services);
+		return modelAndView;
+	}
+
 	@PostMapping("/api/employees")
 	@ResponseBody
 	public ResponseEntity<UnifiedResponse<Employee>> createEmployee(@RequestBody Employee employee) {
@@ -42,19 +68,33 @@ public class UserController {
 		return ResponseEntity.ok(response);
 	}
 
+	@PostMapping(value = "/api/employees/csv", consumes = { "multipart/form-data" })
+	@ResponseBody
+	public ResponseEntity<UnifiedResponse<List<Employee>>> createEmployeeUsingCsvFile(
+			@RequestParam("file") MultipartFile file) throws IOException {
+		UnifiedResponse<List<Employee>> response = new UnifiedResponse<>(200, "Added Successfully",
+				userService.createEmployees(file));
+		return ResponseEntity.ok(response);
+	}
+
 	@PutMapping("/api/employees/{id}")
 	@ResponseBody
 	public ResponseEntity<UnifiedResponse<Employee>> updateEmployee(@PathVariable Long id,
 			@RequestBody Employee employee) {
+		System.out.println("Data is coming like on update  ===" + employee);
 		UnifiedResponse<Employee> response = new UnifiedResponse<>(200, "Updated Successfully",
-				userService.updateEmployee(id, employee));
+				userService.updateEmployeeInOneGo(id, employee));
 		return ResponseEntity.ok(response);
 	}
 
 	@PostMapping("/api/login")
 	@ResponseBody
-	public ResponseEntity<UnifiedResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest) {
-		LoginResponse loginResponse = userService.getEmployeeByEmailAndPassword(loginRequest);
+	public ResponseEntity<UnifiedResponse<LoginResponse>> login(@RequestBody LoginRequest loginRequest,
+			HttpSession session) {
+		System.out.println("Login data be like ===" + loginRequest);
+		Employee employee = userService.getEmployeeByEmailAndPassword(loginRequest);
+		session.setAttribute("loggedInUser", employee);
+		LoginResponse loginResponse = new LoginResponse(employee.getRoles());
 		UnifiedResponse<LoginResponse> response = new UnifiedResponse<>(200, "Logged in successfully", loginResponse);
 		return ResponseEntity.ok(response);
 	}
@@ -68,6 +108,7 @@ public class UserController {
 			@RequestParam(name = "pageNumber", defaultValue = "0") String pageNo,
 			@RequestParam(name = "pageSize", defaultValue = "10") String pageSize,
 			@RequestParam(name = "offset", defaultValue = "0") String offset,
+			@RequestParam(name = "lastPage", defaultValue = "false") String lastPage,
 			@RequestParam(name = "searchQuery", required = false) String searchQuery) {
 		System.out.println("Received Parameters: in controller");
 		System.out.println("ID: " + id);
@@ -75,9 +116,8 @@ public class UserController {
 		System.out.println("Age: " + age);
 
 		UnifiedResponse<PageResponse<Employee>> response = new UnifiedResponse<>(200, "Filtered successfully",
-				userService.findEmployeesByFilters(city, age, searchQuery, pageNo, pageSize, offset, null, null, null,
-						null, null, null, null));
+				userService.findEmployeesByFilters(city, age, searchQuery, pageNo, pageSize, offset, lastPage, null,
+						null, null, null, null, null));
 		return ResponseEntity.ok(response);
 	}
-
 }

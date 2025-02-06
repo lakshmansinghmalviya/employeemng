@@ -1,7 +1,5 @@
 package com.ls.project.response;
 
-import com.ls.project.config.request.LoginRequest;
-
 public class Message {
 	private String msg;
 

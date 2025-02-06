@@ -1,11 +1,14 @@
 $(document).ready(function() {
+
 	var employeeList = [{}]
 
 	const pagination = {
 		pageNumber: 0,
-		pageSize: 10,
 		totalElements: 10,
-		totalPages: 1
+		pageSize: 10,
+		totalPages: 1,
+		offset: 0,
+		lastPage: false,
 	}
 
 	const setDataToPaginationObject = (response) => {
@@ -13,15 +16,8 @@ $(document).ready(function() {
 		pagination.pageSize = response.data.pageSize;
 		pagination.totalElements = response.data.totalElements;
 		pagination.totalPages = response.data.totalPages;
-		console.log("Pagination objec now  === " + JSON.stringify(pagination));
-		setPaginationDataToUI();
-	}
-
-	const setPaginationDataToUI = () => {
-		console.log('Total Pages on ui ', totalPages);
-		$('#totalPages').attr('value', pagination.totalPages)
-		$("#totalPages").text("Total Page : " + pagination.totalPages);
-		$("#pageNumber").val(pagination.pageNumber + 1)
+		pagination.lastPage = response.data.lastPage;
+		console.log("Pagination object now  === " + JSON.stringify(pagination));
 		updatePaginationButtons();
 	}
 
@@ -32,7 +28,7 @@ $(document).ready(function() {
 			method: "GET",
 			success: function(response) {
 				setDataToPaginationObject(response)
-				employeeList = response.data.content;
+				employeeList = response.data.content
 				setEmployeeDataToUi(employeeList);
 			},
 			error: function(err) {
@@ -55,6 +51,7 @@ $(document).ready(function() {
 	$(document).on("click", ".editEmployee", function() {
 		const employeeId = $(this).data("id")
 		$("#email").attr("readonly", true);
+		makeFormBlank();
 		setDataToForm(findEmployeeById(employeeId));
 		$(".saveButton").html("Save Changes");
 		$(".saveButton").addClass("save-employee-changes");
@@ -65,6 +62,8 @@ $(document).ready(function() {
 	$(document).on("click", ".add-employee", function(e) {
 		e.preventDefault();
 		const formData = getFormData();
+		console.log("Form data==" + JSON.stringify(formData));
+
 		$.ajax({
 			url: "/Project/api/employees",
 			method: "POST",
@@ -72,13 +71,16 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			success: function(response) {
 				$("#employeeModal").modal("hide");
-				fetchEmployeeList();
+				const filteredData = fetchAllFilteredDataFromUI();
+				const queryParams = convertToParams(filteredData);
+				fetchFilteredEmployeeFromApi(queryParams);
 			},
 			error: function(err) {
 				alert("Error occurred while creating the employee. Please try again." + err.data.msg);
 			}
 		});
 	});
+
 
 	$(document).on("click", ".save-employee-changes", function(e) {
 		e.preventDefault();
@@ -91,7 +93,9 @@ $(document).ready(function() {
 			contentType: 'application/json',
 			success: function(response) {
 				$("#employeeModal").modal("hide");
-				fetchEmployeeList();
+				const filteredData = fetchAllFilteredDataFromUI();
+				const queryParams = convertToParams(filteredData);
+				fetchFilteredEmployeeFromApi(queryParams);
 			},
 			error: function(err) {
 				alert("Error occurred while editing the employee. Please try again." + err.data.msg);
@@ -100,6 +104,13 @@ $(document).ready(function() {
 	});
 
 	const getFormData = () => {
+		let selectedServices = [];
+		$(".dropdown-menu input:checked").each(function() {
+			selectedServices.push($(this).val());
+		});
+		let status = $("input[name='status']:checked").val();
+		console.log("Selected Status:", status);
+
 		const formData = {
 			id: $("#employeeId").val(),
 			firstName: $("#firstName").val(),
@@ -112,11 +123,14 @@ $(document).ready(function() {
 			street: $("#street").val(),
 			dept: $("#dept").val(),
 			doj: $("#doj").val(),
-			role: $("#role").val(),
-			password: $("#password").val()
+			roles: $("#role").val(),
+			password: $("#password").val(),
+			services: selectedServices.join(','),
+			active: status == 'active' ? true : false,
 		};
 		return formData;
 	};
+
 	const setDataToForm = (employee) => {
 		$("#employeeId").val(employee.id);
 		$("#firstName").val(employee.firstName);
@@ -129,9 +143,22 @@ $(document).ready(function() {
 		$("#street").val(employee.street);
 		$("#dept").val(employee.dept);
 		$("#doj").val(employee.doj);
-		$("#role").val(employee.role);
-		$("#password").val(employee.password);
+		$("#role").val(employee.roles);
+		$("#password").val("");
+		if (employee.active) {
+			$("#active").prop("checked", true);
+		} else {
+			$("#inactive").prop("checked", true);
+		}
+
+		let services = employee.services.split(',');
+		$("#serviceDropdown").siblings("ul").find("input").each(function() {
+			if (services.includes($(this).val())) {
+				$(this).prop("checked", true);
+			}
+		});
 	};
+
 
 	const makeFormBlank = () => {
 		$("#employeeId").val("");
@@ -147,14 +174,27 @@ $(document).ready(function() {
 		$("#doj").val("");
 		$("#role").val("");
 		$("#password").val("");
+		$(".dropdown-menu input:checked").prop("checked", false);
+		$("input[name='status']").prop("checked", false);
+		$("#active").prop("checked", true);
 	};
 
 	const findEmployeeById = (id) => {
 		return employeeList.find(obj => obj.id == id);
 	}
 
+	const setPaginationDataDefault = () => {
+		pagination.pageNumber = 0;
+		pagination.totalElements = 10;
+		pagination.pageSize = 10;
+		pagination.totalPages = 1;
+		pagination.offset = 0;
+		pagination.lastPage = false
+	}
+
 	$("#ageFilterSelect").change(function(e) {
 		e.preventDefault();
+		setPaginationDataDefault();
 		const filteredData = fetchAllFilteredDataFromUI();
 		const queryParams = convertToParams(filteredData);
 		fetchFilteredEmployeeFromApi(queryParams);
@@ -162,6 +202,7 @@ $(document).ready(function() {
 
 	$("#cityFilterSelect").change(function(e) {
 		e.preventDefault();
+		setPaginationDataDefault();
 		const filteredData = fetchAllFilteredDataFromUI();
 		const queryParams = convertToParams(filteredData);
 		fetchFilteredEmployeeFromApi(queryParams);
@@ -169,6 +210,7 @@ $(document).ready(function() {
 
 	$("#searchQuery").on("input", function(e) {
 		e.preventDefault();
+		setPaginationDataDefault();
 		const filteredData = fetchAllFilteredDataFromUI();
 		console.log(filteredData);
 		const queryParams = convertToParams(filteredData);
@@ -178,17 +220,15 @@ $(document).ready(function() {
 
 	$("#nextPage").click(function(e) {
 		e.preventDefault();
-		if (pagination.pageNumber < pagination.totalPages - 1) {
-			pagination.pageNumber++;
-			updatePaginationButtons();
-			const queryParams = convertToParams(fetchAllFilteredDataFromUI());
-			fetchFilteredEmployeeFromApi(queryParams);
-		}
+		pagination.pageNumber++;
+		updatePaginationButtons();
+		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		fetchFilteredEmployeeFromApi(queryParams);
 	});
 
 	$("#firstPage").click(function(e) {
 		e.preventDefault();
-		pagination.pageNumber = 0;
+		setPaginationDataDefault();
 		updatePaginationButtons();
 		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
 		fetchFilteredEmployeeFromApi(queryParams);
@@ -205,29 +245,39 @@ $(document).ready(function() {
 
 	$("#lastPage").click(function(e) {
 		e.preventDefault();
-		pagination.pageNumber = pagination.totalPages - 1;
-		updatePaginationButtons();
-		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		$("#nextPage").hide();
+		const queryParams = convertToParams(fetchAllFilteredDataFromUIOnLastPageClicked());
 		fetchFilteredEmployeeFromApi(queryParams);
 	});
 
 	$("#prevPage").click(function(e) {
 		e.preventDefault();
+		console.log("Before minus ===" + pagination.pageNumber);
 		if (pagination.pageNumber >= 1) {
-			pagination.pageNumber--;
-			updatePaginationButtons();
-			const queryParams = convertToParams(fetchAllFilteredDataFromUI());
-			fetchFilteredEmployeeFromApi(queryParams);
+			pagination.pageNumber = pagination.pageNumber - 1;
+			pagination.lastPage = false;
 		}
+		console.log("After minus ===" + pagination.pageNumber);
+		const queryParams = convertToParams(fetchAllFilteredDataFromUI());
+		console.log("The pagination params === " + queryParams);
+		fetchFilteredEmployeeFromApi(queryParams);
 	});
 
 	function updatePaginationButtons() {
 		console.log("Pagination data " + JSON.stringify(pagination));
-		$("#nextPage").toggle(pagination.pageNumber < pagination.totalPages - 1);
-		$("#lastPage").toggle(pagination.pageNumber < pagination.totalPages - 1);
+		$("#pageNumber").val(pagination.pageNumber + 1)
 		$("#prevPage").toggle(pagination.pageNumber > 0);
-		$("#firstPage").toggle(pagination.pageNumber > 0);
-		$("#pageNumber").val(pagination.pageNumber + 1);
+		$("#firstPage").toggle(pagination.pageNumber > 0)
+
+		if (pagination.lastPage == true) {
+			$("#nextPage").hide();
+			$("#nextPage").hide();
+			$("#lastPage").hide();
+		}
+		else {
+			$("#nextPage").show();
+			$("#lastPage").show();
+		}
 	}
 
 	const fetchAllFilteredDataFromUI = () => {
@@ -236,7 +286,15 @@ $(document).ready(function() {
 			city: $("#cityFilterSelect").val(),
 			searchQuery: $("#searchQuery").val(),
 			pageNumber: pagination.pageNumber,
-			pageSize: pagination.pageSize
+			pageSize: pagination.pageSize,
+			lastPage: pagination.lastPage,
+		}
+	}
+
+	const fetchAllFilteredDataFromUIOnLastPageClicked = () => {
+		return {
+			...fetchAllFilteredDataFromUI(),
+			lastPage: "true"
 		}
 	}
 
@@ -252,7 +310,7 @@ $(document).ready(function() {
 
 		employees.forEach(function(employee) {
 			rows +=
-				"<tr class='table-success border border-success'>" +
+				"<tr class='table-success border border-success editEmployee' data-id='" + employee.id + "'>" +
 				"<th scope='row'>" + employee.id + "</th>" +
 				"<td>" + employee.firstName + "</td>" +
 				"<td>" + employee.lastName + "</td>" +
@@ -265,10 +323,17 @@ $(document).ready(function() {
 				"<td>" + employee.city + "</td>" +
 				"<td>" +
 				"<button class='btn btn-primary btn-sm editEmployee' data-id='" + employee.id + "'>Edit</button> " +
-				"<button class='btn btn-danger btn-sm ' data-id='" + employee.id + "'>Active/InActive</button>" +
+				"</td>" +
+				"<td>" +
+				"<button class='btn btn-danger btn-sm ' data-id='" + employee.id + "'>" + (employee.active ? "YES" : "NO") + "</button>" +
 				"</td>" +
 				"</tr>";
 		});
 		$("table tbody").html(rows);
 	}
+
+	$(".newByCSV").click(function(e) {
+		e.preventDefault();
+		$("#fileUploadModal").modal("show");
+	});
 });
